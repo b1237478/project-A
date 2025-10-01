@@ -164,10 +164,10 @@ class NoteController extends Controller
                 ->update(array_merge($changeData, ['version' => $version + 1]));
 
             if (!$update) {
-                throw new \RuntimeException('Please wait a mount');
+                throw new \RuntimeException('Please wait a moment');
             }
 
-        $note->refresh();
+            $note->refresh();
 
         // 寫操作紀錄並推播
         //if ($note->save()) {
