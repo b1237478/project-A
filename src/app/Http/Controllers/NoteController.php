@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Repositories\NotesRepository;
 use App\Services\BroadcastService;
 use App\Services\OperationLogService;
@@ -139,29 +140,45 @@ class NoteController extends Controller
             throw new \InvalidArgumentException('Invalid title');
         }
 
+        $version = $note->version;
+
         $changeData = ['id' => $note->id];
 
         // 判斷是否有修改
         if ($request->has('title') && $note->title !== $request->title) {
-            $note->title = $request->title;
+            //$note->title = $request->title;
             $changeData['title'] = $note->title;
         }
 
         if ($request->has('content') && $note->content !== $request->content) {
-            $note->content = $request->content;
+            //$note->content = $request->content;
             $changeData['content'] = $note->content;
         }
 
         // $note->operator
 
+        // 樂觀鎖避免同時修改
+        DB::transaction(function () use ($note, $changeData, $version) {
+            $update = Note::where('id', $note->id)
+                ->where('version', $version)
+                ->update(array_merge($changeData, ['version' => $version + 1]));
+
+            if (!$update) {
+                throw new \RuntimeException('Please wait a mount');
+            }
+
+        $note->refresh();
+
         // 寫操作紀錄並推播
-        if ($note->save()) {
+        //if ($note->save()) {
             $this->operationLogService->recordLog(
                 'update',
                 TableConstant::OPERATION_LOGS->value,
-                $changeData);
+                $changeData
+            );
             $this->broadcastService->publishMessage($note, 'update');
-        }
+        //}
+        });
 
         return [
             'result' => 'ok',
