@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\Note;
+use App\Models\Account;
+use App\Models\Transaction;
 
 class User extends Authenticatable
 {
@@ -51,4 +53,14 @@ class User extends Authenticatable
     // {
     //     return $this->hasMany(Note::class);
     // }
+
+    public function accounts()
+    {
+        return $this->hasOne(Account::class);
+    }
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
 }
