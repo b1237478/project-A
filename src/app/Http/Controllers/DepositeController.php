@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Services\OperateTransactionService;
+use App\Jobs\ProcessTransaction;
 use App\Models\Account;
 
 class DepositeController extends Controller
@@ -36,24 +38,40 @@ class DepositeController extends Controller
             'amount' => 'required|numeric'
         ]);
 
-        $account = Account::where('user_id', $request->user_id)->first();
+        $userId = $request->user_id;
+        $account = Account::where('user_id', $userId)->first();
 
         if (!$account) {
             throw new \RuntimeException('Account not exist!');
         }
 
-        // 寫明細進redis
-        $operateRes = $this->operateTransactionService->transactionIntoRedis();
-        //$redisKey = "deposits:user:{$request->user_id}";
-
-        // job queue寫DB
-
-        if (!$operateRes) {
-            throw new \RuntimeException('Error,please try again');
-        }
-        
         $amount = $request->amount;
         $balance = $account->balance + $amount;
+        $txId = (string) Str::uuid(); // 產生唯一識別碼
+        $createdAt = now()->format('Y-m-d H:i:s');
+        $key = "transactions:user:{$userId}";
+
+        // 寫明細進redis
+        $this->operateTransactionService->recordTransaction(
+            $key,
+            'deposit',
+            $amount,
+            $balance,
+            $txId,
+            $createdAt
+        );
+
+        $data = [
+            'tx_id' => $txId,
+            'user_id' => $userId,
+            'amount' => $amount,
+            'type' => 'deposit',
+            'balance_after' => $balance,
+            'created_at' => $createdAt
+        ];
+
+        ProcessTransaction::dispatch($data);// job queue寫DB
+
         $version = $account->version;
 
         DB::transaction(function () use ($account, $balance, $version) {
