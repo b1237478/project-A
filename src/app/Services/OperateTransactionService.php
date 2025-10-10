@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Redis;
 Class OperateTransactionService
 {
     /**
-     * 紀錄請款資料
+     * 紀錄交易資料
      * 
      * @param string $key redis key
      * @param string $type (deposit, withdraw)
