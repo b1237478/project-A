@@ -29,10 +29,6 @@ Class CheckBalanceService
 
         $newBalance = $balance - $amount;
 
-        if ($newBalance < 0) {
-            return false;
-        }
-
         return $newBalance;   
     }
 }

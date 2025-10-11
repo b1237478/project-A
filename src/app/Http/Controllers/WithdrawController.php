@@ -6,18 +6,22 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Services\OperateTransactionService;
+use App\Services\CheckBalanceService;
 use App\Jobs\ProcessTransaction;
 use App\Models\Account;
 
 class WithdrawController extends Controller
 {
     private $operateTransactionService;
+    private $checkBalanceService;
 
     public function __construct( 
         OperateTransactionService $operateTransactionService,
+        CheckBalanceService $checkBalanceService
     )
     {
         $this->operateTransactionService = $operateTransactionService;
+        $this->checkBalanceService = $checkBalanceService;
     }
 
     /**
@@ -45,7 +49,9 @@ class WithdrawController extends Controller
         }
 
         $amount = $request->amount;
-        $balance = $account->balance - $amount;
+
+        // 計算餘額
+        $balance = $this->checkBalanceService->checkAccountBalance($userId, $amount);
 
         if ($balance < 0) {
             throw new \RuntimeException('Balance not enough!');
