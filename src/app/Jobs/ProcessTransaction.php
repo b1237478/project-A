@@ -14,13 +14,13 @@ class ProcessTransaction implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public $depositData;
+    public $transactionData;
     /**
      * Create a new job instance.
      */
-    public function __construct($depositData)
+    public function __construct($transactionData)
     {
-        $this->depositData = $depositData;
+        $this->transactionData = $transactionData;
     }
 
     /**
@@ -30,22 +30,22 @@ class ProcessTransaction implements ShouldQueue
     {
         $insertRes = DB::table('transactions')
             ->insert([
-                'user_id' => $this->depositData['user_id'],
-                'type' => $this->depositData['type'],
-                'amount' => $this->depositData['amount'],
-                'balance_after' => $this->depositData['balance_after'],
-                'created_at' => $this->depositData['created_at']
+                'user_id' => $this->transactionData['user_id'],
+                'type' => $this->transactionData['type'],
+                'amount' => $this->transactionData['amount'],
+                'balance_after' => $this->transactionData['balance_after'],
+                'created_at' => $this->transactionData['created_at']
             ]);
 
         // 刪除redis明細
         if ($insertRes) {
-            $key = "transactions:user:{$this->depositData['user_id']}";
+            $key = "transactions:user:{$this->transactionData['user_id']}";
             $transactions = Redis::lrange($key, 0, -1);
 
             foreach ($transactions as $item) {
                 $itemData = json_decode($item, true);
 
-                if ($itemData['tx_id'] === $this->depositData['tx_id']) {
+                if ($itemData['tx_id'] === $this->transactionData['tx_id']) {
                     Redis::lrem($key, 1, $item);
                     break;
                 }
