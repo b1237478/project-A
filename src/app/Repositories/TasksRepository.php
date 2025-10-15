@@ -4,7 +4,7 @@ namespace App\Repositories;
 
 use Illuminate\Support\Facades\DB;
 
-class NotesRepository
+class TasksRepository
 {
     /**
      * 建立搜尋條件
@@ -15,7 +15,7 @@ class NotesRepository
      */
     private function _queryBuilder($data)
     {
-        $out = DB::table('notes')
+        $out = DB::table('tasks')
             ->orderBy('id', 'desc');
 
         if (isset($data['title'])) {
@@ -26,15 +26,17 @@ class NotesRepository
     }
 
     /**
-     * 取得note的清單
+     * 取得task的清單
      *
      * @param array $data 搜尋條件
      *
      * @return collection
      */
-    public function getlist($data)
+    public function getList($data)
     {
         $out = $this->_queryBuilder($data);
+        $out->where('user_id', $data['user_id'])
+            ->orWhere('assignee_id', $data['user_id']);
 
         if (isset($data['first'])) {
             $out->skip($data['first']);

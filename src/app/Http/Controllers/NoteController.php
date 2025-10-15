@@ -32,8 +32,8 @@ class NoteController extends Controller
      * 筆記清單
      * 
      * 請求欄位：
-     *  string int 起始筆數
-     *  string int 搜尋筆數
+     *  int first 起始筆數
+     *  int limit 搜尋筆數
      * 
      * @param \Illuminate\Http\Request $request
      * 
@@ -50,6 +50,10 @@ class NoteController extends Controller
             'first' => $request->first,
             'limit' => $request->limit
         ];
+
+        if ($request->has('title')) {
+            $data['title'] = $request->title;
+        }
 
         $out = $this->notesRepository->getlist($data);
 
