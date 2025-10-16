@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Repositories\TasksRepository;
 use App\Services\CheckTaskPermissionService;
 use App\Models\Task;
@@ -40,7 +41,7 @@ class TaskController extends Controller
 
         $data = [
             'first' => $request->first,
-            'user_id' => $request->user_id
+            'user_id' => Auth::id()
         ];
 
         if ($request->has('limit')) {
@@ -77,15 +78,11 @@ class TaskController extends Controller
             'title' => 'required|max:255',
             'description' => 'required|string',
             'status' => 'in:pending,in-progress,completed',
-            //'assignee_id' => 'nullable|exists:users,id',
+            'assignee_id' => 'nullable|exists:users,id'
         ]);
 
-        $validated['user_id'] = $request->user_id;
+        $validated['user_id'] = Auth::id();
         $validated['created_at'] = now()->format('Y-m-d H:i:s');
-
-        if ($request->has('assignee_id')) {
-            $validated['assignee_id'] = $request->assignee_id;
-        }
 
         $out = Task::create($validated);
 
@@ -116,7 +113,7 @@ class TaskController extends Controller
             'title' => 'nullable|max:255',
             'description' => 'nullable|string',
             'status' => 'nullable|in:pending,in-progress,completed',
-            //'assignee_id' => 'nullable|exists:users,id',
+            'assignee_id' => 'nullable|exists:users,id',
         ]);
 
         $task = Task::find($id);
@@ -125,7 +122,7 @@ class TaskController extends Controller
             throw new \RuntimeException('Not find task');
         }
 
-        $userId = $request->user_id;
+        $userId = Auth::id();
 
         // 檢查是否有權限編輯
         $permissionCheck = $this->checkTaskPermissionService->checkPermission(
@@ -136,10 +133,6 @@ class TaskController extends Controller
 
         if (!$permissionCheck) {
             throw new \RuntimeException("You don't have permission!");
-        }
-
-        if ($request->has('assignee_id')) {
-            $validated['assignee_id'] = $request->assignee_id;
         }
 
         $task->update($validated);
@@ -158,7 +151,7 @@ class TaskController extends Controller
      * 
      * @return \Illuminate\Http\Response
      */
-    public function destory(Request $request, $id)
+    public function destroy($id)
     {
         $task = Task::find($id);
 
@@ -166,7 +159,7 @@ class TaskController extends Controller
             throw new \RuntimeException('Not find task');
         }
 
-        $userId = $request->user_id;
+        $userId = Auth::id();
 
         // 檢查是否有權限編輯
         $permissionCheck = $this->checkTaskPermissionService->checkPermission(
