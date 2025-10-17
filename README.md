@@ -1,8 +1,29 @@
 安裝環境設定:
+.env檔DB,redis設定
+
+DB_CONNECTION=mysql
+
+DB_HOST=mysql_db
+
+DB_PORT=3306
+
+DB_DATABASE=projectA
+
+DB_USERNAME=root
+
+DB_PASSWORD=root
+
+REDIS_CLIENT=predis
+
+REDIS_HOST=redis_cache
+
+REDIS_PASSWORD=null
+
+REDIS_PORT=6379
+
+建立container
 
 docker-compose up -d --build
-
-資料庫建DATABASE projectA
 
 進入container laravel_app 安裝套件,執行migration:
 
