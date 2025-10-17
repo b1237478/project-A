@@ -10,10 +10,6 @@ DB_PORT=3306
 
 DB_DATABASE=projectA
 
-DB_USERNAME=root
-
-DB_PASSWORD=root
-
 REDIS_CLIENT=predis
 
 REDIS_HOST=redis_cache
