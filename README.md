@@ -1,4 +1,5 @@
 安裝環境設定:
+
 .env檔DB,redis設定
 
 DB_CONNECTION=mysql
