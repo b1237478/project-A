@@ -40,9 +40,12 @@ class TaskController extends Controller
         ]);
 
         $data = [
-            'first' => $request->first,
             'user_id' => Auth::id()
         ];
+
+        if ($request->has('first')) {
+            $data['first'] = $request->first;
+        }
 
         if ($request->has('limit')) {
             $data['limit'] = $request->limit;
