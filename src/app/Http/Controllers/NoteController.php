@@ -102,7 +102,7 @@ class NoteController extends Controller
 
             $this->operationLogService->recordLog(
                 'create',
-                TableConstant::OPERATION_LOGS->value,
+                TableConstant::NOTES->value,
                 $changeData
             );
             $this->broadcastService->publishMessage($note, 'create');
@@ -177,7 +177,7 @@ class NoteController extends Controller
         //if ($note->save()) {
             $this->operationLogService->recordLog(
                 'update',
-                TableConstant::OPERATION_LOGS->value,
+                TableConstant::NOTES->value,
                 $changeData
             );
             $this->broadcastService->publishMessage($note, 'update');
@@ -215,7 +215,7 @@ class NoteController extends Controller
 
             $this->operationLogService->recordLog(
                 'delete',
-                TableConstant::OPERATION_LOGS->value,
+                TableConstant::NOTES->value,
                 $changeData);
             $this->broadcastService->publishMessage($note, 'delete');
         }
