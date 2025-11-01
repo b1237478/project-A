@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redis;
 use App\Services\OperateTransactionService;
 use App\Jobs\ProcessTransaction;
 use App\Models\Account;
@@ -73,7 +74,7 @@ class DepositeController extends Controller
 
         $version = $account->version;
 
-        DB::transaction(function () use ($account, $balance, $version) {
+        DB::transaction(function () use ($account, $balance, $version, $userId)  {
             $update = Account::where('id', $account->id)
                 ->where('version', $version)
                 ->update(['balance' => $balance, 'version' => $version + 1]);
@@ -81,6 +82,8 @@ class DepositeController extends Controller
             if (!$update) {
                 throw new \RuntimeException('Please wait a moment');
             }
+
+            Redis::set("account:balance:{$userId}", $balance);
         });
 
         return [

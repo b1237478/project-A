@@ -30,7 +30,8 @@ class NotesApiTest extends TestCase
             [
                 'title' => '測試標題2',
                 'content' => '測試內容2',
-                'created_at' => '2025-01-02 00:00:00'],
+                'created_at' => '2025-01-02 00:00:00'
+            ],
         ]);
     }
 
